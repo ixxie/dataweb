@@ -12,10 +12,11 @@
 
 	let el: HTMLElement;
 	const plot = vg.plot(
-		vg.line(vg.from(from), { x, y }),
+		vg.line(vg.from(from, {filterBy: selection}), { x, y }),
 		vg.width(width),
 		vg.height(height),
-		vg.intervalX({ as: selection })
+		vg.intervalX({ as: selection }),
+        vg.xDomain(selection),
 	);
 
 	onMount(() => {

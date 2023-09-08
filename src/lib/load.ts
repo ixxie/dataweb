@@ -50,27 +50,36 @@ export async function loadFiles(db: AsyncDuckDB, filelist: FileList | undefined)
                 unpivot 'raw.csv'
                 on columns(* exclude (column00, column01))
                 into
-                    name frame
+                    name col
                     value force
             ),
             diff as (
                 select
-                    u.*,
-                    lead(epoch(column01), 10) over (order by column00) - epoch(column01) as time_diff,
-                    epoch(column01) - first(epoch(column01)) over (order by column00) as time
+                    epoch(u.column01)*1000 as t,
+                    u.force as force,
+                    lead(epoch(u.column01), 10) over (order by u.column00) - epoch(u.column01) as delta,
+                    cast(substring(u.col, 7) as int) - 2 as frame
                 from unpivoted u
             ),
             corrected as (
                 select
-                    cast(nextval('id_seq') as int) as id,
-                    time_diff,
-                    epoch(column01)*1000 + (substring(frame, 7) :: INT - 2)*time_diff*100 as t,
-                    epoch_ms(epoch(column01)*1000 + (substring(frame, 7) :: INT - 2)*time_diff*100) as timestamp,
-                    cast(force as int) as force,
+                    nextval('id_seq') :: int as id,
+                    frame,
+                    delta,
+                    t + frame*delta*100 as abs_time,
+                    epoch_ms(abs_time) as timestamp,
+                    force :: int as force,
                     'A' as sensor
-                from diff
+                from diff d
+            ),
+            result as (
+                select
+                    c.*,
+                    c.abs_time - first(c.abs_time) over (order by c.abs_time) as rel_time,
+                    rel_time/1000 as t
+                from corrected c
             )
-            select * from corrected;
+            select * from result;
         `);
         await conn.close();
     }

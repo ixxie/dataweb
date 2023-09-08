@@ -4,6 +4,7 @@
 	import { loadFiles } from '$lib';
 	import Table from './Table.svelte';
 	import Timeline from './Timeline.svelte';
+	import Zoom from './Zoom.svelte';
 
 	let dash: HTMLElement;
 	let filelist: FileList | undefined;
@@ -12,7 +13,7 @@
 	let selection: any;
 
 	$: if (filelist) {
-		vg.wasmConnector({ log: true }).then(async (connector: ReturnType<typeof vg.wasmConnector>) => {
+		vg.wasmConnector({ log: true, cache: false }).then(async (connector: ReturnType<typeof vg.wasmConnector>) => {
 			await loadFiles(connector.db, filelist);
 			await vg.coordinator().databaseConnector(connector);
 			selection = vg.Selection.crossfilter();
@@ -35,10 +36,14 @@
 
 {#if ready}
 	<Timeline from="traction" x="t" y="force" {selection} />
+	<Zoom
+		from="traction" x="t" y="force" {selection} 
+	/>
 	<Table
 		from="traction"
-		columns={{ t: 50, time_diff: 50, force: 50, sensor: 50 }}
+		columns={{ sensor: 50, t: 50, force: 50}}
 		height={300}
+		maxWidth={300}
 		{selection}
 	/>
 {/if}

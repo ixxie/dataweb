@@ -5,6 +5,7 @@
 	export let from: string;
 	export let columns: {};
 	export let height: number;
+	export let maxWidth: number = 400;
 	export let selection: any;
 
 	let el: HTMLElement;
@@ -13,6 +14,7 @@
 		filterBy: selection,
 		columns: Object.keys(columns),
 		width: columns,
+		maxWidth,
 		height
 	});
 
