@@ -1,21 +1,24 @@
 <script lang="ts">
 	import * as vg from '@uwdata/vgplot';
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount, onDestroy, getContext } from 'svelte';
 
 	export let from: string;
-	export let columns: {};
-	export let height: number;
-	export let maxWidth: number = 400;
-	export let selection: any;
+	export let columns: {} | undefined = undefined;
+	export let selection: any | undefined = undefined;
+
+	const app = getContext('app-state');
+
+	let cols = columns ? { columns: Object.keys(columns) } : {};
 
 	let el: HTMLElement;
 	let table = vg.table({
 		from,
-		filterBy: selection,
-		columns: Object.keys(columns),
-		width: columns,
-		maxWidth,
-		height
+		...(selection ? { filterBy: selection } : {}),
+		width: columns ? columns : app.col,
+		maxWidth: app.col,
+		height: app.row,
+		margin: 0,
+		...cols
 	});
 
 	onMount(() => {
@@ -26,4 +29,4 @@
 	});
 </script>
 
-<div bind:this={el} />
+<div class="chart" bind:this={el} style={app.css} />

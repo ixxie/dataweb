@@ -1,22 +1,24 @@
 <script lang="ts">
 	import * as vg from '@uwdata/vgplot';
-	import { onMount, onDestroy } from 'svelte';
-
-	export let from: string;
-	export let x: string;
-	export let y: string;
-	export let width: number = 800;
-	export let height: number = 400;
+	import { onMount, onDestroy, getContext } from 'svelte';
 
 	export let selection: any;
 
+	const app = getContext('app-state');
+
 	let el: HTMLElement;
 	const plot = vg.plot(
-		vg.line(vg.from(from, {filterBy: selection}), { x, y }),
-		vg.width(width),
-		vg.height(height),
-		vg.intervalX({ as: selection }),
-        vg.xDomain(selection),
+		vg.circle(vg.from('traction', { filterBy: selection }), {
+			x: 't',
+			y: 'sensorA',
+			fill: '#222'
+		}),
+		vg.width(app.col),
+		vg.height(app.row),
+		vg.xDomain(selection),
+		vg.style(app.css),
+		vg.margin(0),
+		vg.grid(true)
 	);
 
 	onMount(() => {
@@ -27,4 +29,4 @@
 	});
 </script>
 
-<div bind:this={el} />
+<div class="chart" bind:this={el} />
