@@ -18,7 +18,7 @@
 		vg.margin(0),
 		vg.grid(true),
 		vg.colorScale('categorical'),
-		vg.colorLegend({ columns: 1 })
+		vg.colorLegend()
 	);
 
 	onMount(() => {
