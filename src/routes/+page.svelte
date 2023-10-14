@@ -20,7 +20,7 @@
 				async (connector: ReturnType<typeof vg.wasmConnector>) => {
 					metadata = await load(connector.db, filelist);
 					await vg.coordinator().databaseConnector(connector);
-					selection = vg.Selection.crossfilter();
+					selection = vg.Selection.single();
 					ready = true;
 				}
 			);
