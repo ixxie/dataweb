@@ -27,9 +27,10 @@
 		}
 	};
 
+	let innerWidth: number = 1000;
+
 	setContext('app-state', {
 		metadata,
-		col: 1000,
 		row: 400,
 		css: `
 			font-size: 13px;
@@ -37,10 +38,9 @@
 	});
 
 	let activeTab = 'dashboard';
-
-	let timeline: any;
-	let zoom: any;
 </script>
+
+<svelte:window bind:innerWidth />
 
 <nav>
 	<h1>Datafficheur 2.0</h1>
@@ -58,38 +58,20 @@
 <main>
 	{#if filelist}
 		{#if ready}
-			<menu class="tablist">
-				<button
-					on:click={() => (activeTab = 'dashboard')}
-					class:active={activeTab == 'dashboard'}
-					class="tab"
-				>
-					Dashboard
-				</button>
-				<button
-					on:click={() => (activeTab = 'debug')}
-					class:active={activeTab == 'debug'}
-					class="tab"
-				>
-					Debug
-				</button>
-			</menu>
-			{#key activeTab}
-				<article class:hidden={activeTab !== 'dashboard'}>
-					<Mininav {selection} />
-					<Timeseries {selection} />
-					<Distribution {selection} />
-					<Table from="traction" {selection} />
-				</article>
-				<article class:hidden={activeTab !== 'debug'}>
-					<Table from="time" />
-				</article>
-			{/key}
+			<article>
+				<h2>graphiques</h2>
+				<Mininav {selection} {innerWidth} />
+				<Timeseries {selection} {innerWidth} />
+				<Distribution {selection} {innerWidth} />
+				<h2>tableaux</h2>
+				<Table from="traction" {selection} {innerWidth} />
+				<Table from="time" {innerWidth} />
+			</article>
 		{:else}
-			<p>Loading...</p>
+			<p>Charger...</p>
 		{/if}
 	{:else}
-		<p>Select a file to use...</p>
+		<p>Sélectionnez un ou plusieurs fichiers datafficheur pour commencer...</p>
 	{/if}
 </main>
 
@@ -97,7 +79,7 @@
 	:root {
 		--highlight: rgb(148, 187, 121);
 		--primary: rgb(56, 56, 56);
-		--app-width: 1200px;
+		--app-width: min(1200px, 100%);
 	}
 
 	.tab {
@@ -116,27 +98,19 @@
 	}
 
 	nav {
-		width: var(--app-width);
+		width: 100%;
 		height: fit-content;
-		padding: 0.5rem;
 		display: flex;
 		flex-flow: row nowrap;
 		justify-content: space-between;
 	}
 
 	main {
-		padding: 0.5rem;
-		width: fit-content;
-	}
-
-	button {
-		border: 0;
-		background-color: var(--primary);
-		color: white;
+		width: 100%;
 	}
 
 	article {
-		width: var(--app-width);
+		width: 100%;
 		border: 2px solid var(--primary);
 		border-radius: 0.5rem;
 		padding: 0.5rem;
@@ -145,8 +119,24 @@
 		justify-content: center;
 	}
 
+	button {
+		border: 0;
+		background-color: var(--primary);
+		color: white;
+	}
+
+	h1 {
+		font-size: 18px;
+		text-transform: uppercase;
+	}
+
+	h2 {
+		font-size: 14px;
+		text-transform: uppercase;
+	}
+
 	p {
-		margin-top: 200px;
+		margin: 10rem;
 		font-size: larger;
 	}
 </style>

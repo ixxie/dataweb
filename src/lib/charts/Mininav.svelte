@@ -3,15 +3,17 @@
 	import { onMount, onDestroy, getContext } from 'svelte';
 
 	export let selection: any;
+	export let innerWidth: number;
 
 	const app = getContext('app-state');
 
 	let el: HTMLElement;
-	export const plot = vg.plot(
+	$: plot = vg.plot(
 		vg.areaY(vg.from('traction'), { x: 't', y: 'signal', fill: 'sensor' }),
-		vg.width(app.col),
+		vg.width(innerWidth),
 		vg.height(app.row / 3),
 		vg.intervalX({ as: selection }),
+		vg.yLabel('puissance'),
 		vg.style(app.css),
 		vg.margin(0),
 		vg.grid(true),

@@ -3,11 +3,17 @@
   margin: 0;
   padding: 0;
   max-width: 100%;
+  box-sizing: border-box;
 }
 
 html,
 body {
   width: 100%;
+  max-width: 100%;
+}
+
+html {
+  padding: 0.5rem;
 }
 
 body {

@@ -3,27 +3,29 @@
 	import { onMount, onDestroy, getContext } from 'svelte';
 
 	export let selection: any;
+	export let innerWidth: number;
 
 	const app = getContext('app-state');
 
 	let el: HTMLElement;
-	export const plot = vg.plot(
+	$: plot = vg.plot(
 		vg.areaY(vg.from('traction', { filterBy: selection }), {
-			x: vg.bin('signal', { steps: 25 }),
+			x: vg.bin('signal', { steps: 150 }),
 			y: vg.count(),
 			fill: 'sensor',
 			fillOpacity: 0.6,
 			inset: 0.5
 		}),
-		vg.width(app.col),
+		vg.width(innerWidth),
 		vg.height(app.row),
 		vg.xDomain(vg.Fixed),
 		vg.intervalX({ as: selection }),
+		vg.yLabel('fréquence'),
+		vg.xLabel('puissance'),
 		vg.style(app.css),
 		vg.margin(0),
 		vg.grid(true),
-		vg.colorScale('categorical'),
-		vg.colorLegend({ columns: 1 })
+		vg.colorScale('categorical')
 	);
 
 	onMount(() => {

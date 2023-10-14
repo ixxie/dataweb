@@ -5,17 +5,18 @@
 	export let from: string;
 	export let columns: {} | undefined = undefined;
 	export let selection: any | undefined = undefined;
+	export let innerWidth: number;
 
 	const app = getContext('app-state');
 
 	let cols = columns ? { columns: Object.keys(columns) } : {};
 
 	let el: HTMLElement;
-	let table = vg.table({
+	$: table = vg.table({
 		from,
 		...(selection ? { filterBy: selection } : {}),
-		width: columns ? columns : app.col,
-		maxWidth: app.col,
+		width: innerWidth,
+		maxWidth: innerWidth,
 		height: app.row,
 		margin: 0,
 		...cols
