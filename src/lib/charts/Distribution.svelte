@@ -19,6 +19,7 @@
 		vg.width(innerWidth),
 		vg.height(app.row),
 		vg.xDomain(vg.Fixed),
+		vg.xNice(),
 		vg.yLabel('fréquence'),
 		vg.xLabel('puissance'),
 		vg.style(app.css),

@@ -33,6 +33,7 @@ const unpivoted = (sensors: Sensor[]): string[] =>
 const correct = (sensor: Sensor) => /*sql*/`
         select
             '${sensor.id}' as sensor,
+            s.column00 as stamp,
             epoch(s.column01)*1000 as epoch,
             s.frame as frame,
             t.diff as diff,
@@ -51,6 +52,7 @@ const traction = (sensors: Sensor[]) => /*sql*/`
     insert into traction
             select
                 'total' as sensor,
+                any_value(stamp),
                 any_value(epoch),
                 any_value(frame),
                 any_value(diff),

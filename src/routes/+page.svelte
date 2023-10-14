@@ -14,16 +14,16 @@
 
 	$: init(filelist);
 
+	const setup = async (connector: ReturnType<typeof vg.wasmConnector>) => {
+		metadata = await load(connector.db, filelist);
+		await vg.coordinator().databaseConnector(connector);
+		selection = vg.Selection.single();
+		ready = true;
+	};
+
 	const init = (filelist: FileList | undefined) => {
 		if (filelist) {
-			vg.wasmConnector({ log: false, cache: false }).then(
-				async (connector: ReturnType<typeof vg.wasmConnector>) => {
-					metadata = await load(connector.db, filelist);
-					await vg.coordinator().databaseConnector(connector);
-					selection = vg.Selection.single();
-					ready = true;
-				}
-			);
+			vg.wasmConnector({ log: false, cache: false }).then(setup);
 		}
 	};
 
@@ -126,7 +126,7 @@
 	}
 
 	h1 {
-		font-size: 18px;
+		font-size: 16px;
 		text-transform: uppercase;
 	}
 
