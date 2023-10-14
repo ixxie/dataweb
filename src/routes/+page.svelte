@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as vg from '@uwdata/vgplot';
 
-	import { loadFiles } from '$lib';
+	import { load } from '$lib/load';
 	import Table from './Table.svelte';
 	import Timeline from './Timeline.svelte';
 	import Zoom from './Zoom.svelte';
@@ -11,21 +11,25 @@
 
 	let ready = false;
 	let selection: any;
-	let preproc: {} | undefined;
+	let metadata: {} | undefined;
 
-	$: if (filelist) {
-		vg.wasmConnector({ log: true, cache: false }).then(
-			async (connector: ReturnType<typeof vg.wasmConnector>) => {
-				preproc = await loadFiles(connector.db, filelist);
-				await vg.coordinator().databaseConnector(connector);
-				selection = vg.Selection.crossfilter();
-				ready = true;
-			}
-		);
-	}
+	$: init(filelist);
+
+	const init = (filelist: FileList | undefined) => {
+		if (filelist) {
+			vg.wasmConnector({ log: false, cache: false }).then(
+				async (connector: ReturnType<typeof vg.wasmConnector>) => {
+					metadata = await load(connector.db, filelist);
+					await vg.coordinator().databaseConnector(connector);
+					selection = vg.Selection.crossfilter();
+					ready = true;
+				}
+			);
+		}
+	};
 
 	setContext('app-state', {
-		preproc,
+		metadata,
 		col: 1000,
 		row: 400,
 		css: `
@@ -34,6 +38,9 @@
 	});
 
 	let activeTab = 'dashboard';
+
+	let timeline: any;
+	let zoom: any;
 </script>
 
 <nav>
@@ -70,12 +77,11 @@
 			</menu>
 			{#key activeTab}
 				<article class:hidden={activeTab !== 'dashboard'}>
-					<Timeline {selection} />
-					<Zoom {selection} />
+					<Timeline {selection} bind:plot={timeline} />
+					<Zoom {selection} bind:plot={zoom} />
 					<Table from="traction" {selection} />
 				</article>
 				<article class:hidden={activeTab !== 'debug'}>
-					<Table from="raw" />
 					<Table from="time" />
 				</article>
 			{/key}
@@ -98,6 +104,11 @@
 		padding: 0.2rem 0.4rem;
 		border-radius: 0.3rem 0.3rem 0 0;
 		opacity: 0.3;
+	}
+
+	.tablist {
+		margin-top: 1rem;
+		padding: 0 1rem;
 	}
 
 	.active {
@@ -132,11 +143,6 @@
 		display: flex;
 		flex-flow: column nowrap;
 		justify-content: center;
-	}
-
-	.tablist {
-		margin-top: 1rem;
-		padding: 0 1rem;
 	}
 
 	p {

@@ -7,11 +7,11 @@
 	const app = getContext('app-state');
 
 	let el: HTMLElement;
-	const plot = vg.plot(
-		vg.circle(vg.from('traction', { filterBy: selection }), {
+	export const plot = vg.plot(
+		vg.line(vg.from('traction', { filterBy: selection }), {
 			x: 't',
-			y: 'sensorA',
-			fill: '#222'
+			y: 'signal',
+			stroke: 'sensor'
 		}),
 		vg.width(app.col),
 		vg.height(app.row),
