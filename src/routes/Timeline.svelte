@@ -14,7 +14,9 @@
 		vg.intervalX({ as: selection }),
 		vg.style(app.css),
 		vg.margin(0),
-		vg.grid(true)
+		vg.grid(true),
+		vg.colorScale('categorical'),
+		vg.colorLegend({ columns: 1 })
 	);
 
 	onMount(() => {
