@@ -2,9 +2,8 @@
 	import * as vg from '@uwdata/vgplot';
 
 	import { load } from '$lib/load';
-	import Table from './Table.svelte';
-	import Timeline from './Timeline.svelte';
-	import Zoom from './Zoom.svelte';
+	import { Mininav, Timeseries, Distribution, Table } from '$lib/charts';
+
 	import { setContext } from 'svelte';
 
 	let filelist: FileList | undefined;
@@ -77,8 +76,9 @@
 			</menu>
 			{#key activeTab}
 				<article class:hidden={activeTab !== 'dashboard'}>
-					<Timeline {selection} bind:plot={timeline} />
-					<Zoom {selection} bind:plot={zoom} />
+					<Mininav {selection} />
+					<Timeseries {selection} />
+					<Distribution {selection} />
 					<Table from="traction" {selection} />
 				</article>
 				<article class:hidden={activeTab !== 'debug'}>
