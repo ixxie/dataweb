@@ -8,9 +8,16 @@
 
 	let el: HTMLElement;
 	export const plot = vg.plot(
+		// sensors signal
 		vg.line(vg.from('traction', { filterBy: selection }), {
 			x: 't',
 			y: 'signal',
+			stroke: 'sensor',
+			opacity: 0.3
+		}),
+		vg.line(vg.from('traction', { filterBy: selection }), {
+			x: 't',
+			y: vg.avg('signal').partitionby('sensor').orderby('t').rows([-10, 10]),
 			stroke: 'sensor'
 		}),
 		vg.width(app.col),
