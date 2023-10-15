@@ -9,7 +9,7 @@
 
 	let el: HTMLElement;
 	$: plot = vg.plot(
-		vg.areaY(vg.from('traction', { filterBy: selection }), {
+		vg.areaY(vg.from('traction'), {
 			x: vg.bin('signal', { steps: 150 }),
 			y: vg.count(),
 			fill: 'sensor',
@@ -17,8 +17,10 @@
 			inset: 0.5
 		}),
 		vg.width(innerWidth),
-		vg.height(app.row),
-		vg.intervalXY({ as: selection }),
+		vg.height(app.row / 3),
+		vg.xDomain(vg.Fixed),
+		vg.intervalX({ as: selection, field: 'signal' }),
+		vg.xNice(),
 		vg.yLabel('fréquence'),
 		vg.xLabel('puissance'),
 		vg.style(app.css),

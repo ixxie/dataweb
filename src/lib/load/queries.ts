@@ -30,10 +30,11 @@ const unpivot = (cols: string[], id: string | number = '') => /*sql*/`
 const unpivoted = (sensors: Sensor[]): string[] =>
     sensors.map((sensor) => unpivot(sensor.signalColumns, sensor.id));
 
-const correct = (sensor: Sensor) => /*sql*/`
+const timeCorrection = (sensor: Sensor) => /*sql*/`
         select
             '${sensor.id}' as sensor,
-            s.column00 as stamp,
+            s.column00 as id,
+            s.column01 as timestamp,
             epoch(s.column01)*1000 as epoch,
             s.frame as frame,
             t.diff as diff,
@@ -43,26 +44,37 @@ const correct = (sensor: Sensor) => /*sql*/`
         join time t on s.column01 = t.current
 `
 
-const corrected = (sensors: Sensor[]) => sensors.map(correct).join(`    union by name`);
+const selectUnion = (sensors: Sensor[], mapping: (sensor: Sensor) => any) =>
+    sensors.map(mapping).join(`    union by name`);
 
 const traction = (sensors: Sensor[]) => /*sql*/`
     create or replace table traction as (    
-        with ${unpivoted(sensors).join(',')} ${corrected(sensors)}
+        with
+            ${unpivoted(sensors).join(',')}
+        ${selectUnion(sensors, timeCorrection)}
     );
     insert into traction
             select
                 'total' as sensor,
-                any_value(stamp),
+                id,
+                any_value(timestamp),
                 any_value(epoch),
                 any_value(frame),
                 any_value(diff),
                 t,
                 sum(signal) as signal
             from traction
-            group by t;
+            group by t, id;
 `;
+
+const traction_collated = /*sql*/`
+    create or replace table traction_collated as (
+        pivot traction on sensor using sum(signal);
+    )
+`
 
 export const queries = {
     time,
-    traction
+    traction,
+    traction_collated
 }

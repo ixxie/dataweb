@@ -12,7 +12,7 @@
 		vg.areaY(vg.from('traction'), { x: 't', y: 'signal', fill: 'sensor' }),
 		vg.width(innerWidth),
 		vg.height(app.row / 3),
-		vg.intervalX({ as: selection }),
+		vg.intervalX({ as: selection, field: 't' }),
 		vg.yLabel('puissance'),
 		vg.style(app.css),
 		vg.margin(0),

@@ -2,6 +2,8 @@ import type { AsyncDuckDB } from '@duckdb/duckdb-wasm';
 
 import { queries as q } from './queries';
 
+import { toObject } from '$lib/db';
+
 export async function load(db: AsyncDuckDB, filelist: FileList | undefined) {
 
     const log = {
@@ -17,33 +19,33 @@ export async function load(db: AsyncDuckDB, filelist: FileList | undefined) {
 
     // unpack filelist
 
-    if (!filelist) {
-        return;
-    }
+    if (!filelist) return;
     const files = getFiles(filelist);
-
-    if (log.files || log.all) {
-        console.log({ filelist, files })
-    }
+    if (log.files || log.all) console.log({ filelist, files });
 
     // clean the csv
 
-    let csv: string | undefined
+    interface Csv {
+        raw?: string;
+        clean?: string;
+    }
 
+    let csv: Csv = { raw: undefined, clean: undefined };
+
+    // join date and time columns into a timestamp
     await Promise.all(files.map((file) => file!.text()))
         .then((texts) => {
-            let raw = texts.join('\r\n');
-            let lines = raw
+            csv.raw = texts.join('\r\n');
+            let lines = csv.raw
                 .split('\r\n')
                 .map((line) => createTimestamps(line, /,/g, ' ', 2));
-            csv = lines.join('\r\n');
+            csv.clean = lines.join('\r\n');
         });
 
-    await db.registerFileText('input.csv', csv!);
+    // use the clean csv as input
+    await db.registerFileText('input.csv', csv.clean!);
 
-    if (log.csv || log.all) {
-        console.log(csv)
-    }
+    if (log.csv || log.all) console.log(csv);
 
     // start the connection
 
@@ -51,10 +53,8 @@ export async function load(db: AsyncDuckDB, filelist: FileList | undefined) {
 
     // produce metadata
 
-    const schema = (await conn.query(`describe select * from input.csv;`))
-        .toArray().map((row) => row.toJSON());
-    const sample = (await conn.query(`select * from input.csv limit 100;`))
-        .toArray().map((row) => row.toJSON());
+    const schema = toObject(await conn.query(`describe select * from input.csv;`));
+    const sample = toObject(await conn.query(`select * from input.csv limit 100;`));
     const columns = schema.map((col) => col.column_name);
 
     const sampleCount = columns.length - 2;
@@ -104,6 +104,7 @@ export async function load(db: AsyncDuckDB, filelist: FileList | undefined) {
 
     // Execute queries
 
+    // logging template
     const step = async (query: string) => {
         if (log.queries || log.all) {
             console.log("executed query", query);
@@ -111,18 +112,27 @@ export async function load(db: AsyncDuckDB, filelist: FileList | undefined) {
         const result = await conn.query(query);
         if (log.queries || log.all) {
             console.log("query results", result);
+            console.table(toObject(result))
         }
     }
 
+    // queries
+
+    // create the time table
     await step(q.time);
 
+    // create the traction table
     await step(q.traction(sensors));
 
     // Close connection
 
     await conn.close();
 
-    return metadata;
+    return {
+        csv,
+        metadata,
+        sensors
+    }
 }
 
 // utilities
@@ -144,5 +154,5 @@ function getFiles(filelist: FileList) {
         files[i] = filelist.item(i);
         i++;
     }
-    return files
+    return files;
 }

@@ -2,22 +2,23 @@
 	import * as vg from '@uwdata/vgplot';
 
 	import { load } from '$lib/load';
-	import { Mininav, Timeseries, Distribution, Table } from '$lib/charts';
+	import { FilterTime, FilterSignal, Timeseries, Distribution, Table } from '$lib/charts';
 
 	import { setContext } from 'svelte';
 
-	let filelist: FileList | undefined;
-
 	let ready = false;
-	let selection: any;
-	let metadata: {} | undefined;
 
+	let filelist: FileList | undefined;
 	$: init(filelist);
+
+	let selection: any;
+
+	let metadata: {} | undefined;
 
 	const setup = async (connector: ReturnType<typeof vg.wasmConnector>) => {
 		metadata = await load(connector.db, filelist);
 		await vg.coordinator().databaseConnector(connector);
-		selection = vg.Selection.single();
+		selection = vg.Selection.crossfilter();
 		ready = true;
 	};
 
@@ -36,8 +37,6 @@
 			font-size: 13px;
 		`
 	});
-
-	let activeTab = 'dashboard';
 </script>
 
 <svelte:window bind:innerWidth />
@@ -60,8 +59,9 @@
 		{#if ready}
 			<article>
 				<h2>graphiques</h2>
-				<Mininav {selection} {innerWidth} />
+				<FilterTime {selection} {innerWidth} />
 				<Timeseries {selection} {innerWidth} />
+				<FilterSignal {selection} {innerWidth} />
 				<Distribution {selection} {innerWidth} />
 				<h2>tableaux</h2>
 				<Table from="traction" {selection} {innerWidth} />
@@ -110,7 +110,7 @@
 	}
 
 	article {
-		width: 100%;
+		width: max-content;
 		border: 2px solid var(--primary);
 		border-radius: 0.5rem;
 		padding: 0.5rem;
