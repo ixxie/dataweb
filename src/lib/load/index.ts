@@ -105,13 +105,13 @@ export async function load(db: AsyncDuckDB, filelist: FileList | undefined) {
     // Execute queries
 
     // logging template
-    const step = async (query: string) => {
+    const step = async (name: string, query: string) => {
         if (log.queries || log.all) {
-            console.log("executed query", query);
+            console.log(`Executed ${name} query`, query);
         }
         const result = await conn.query(query);
         if (log.queries || log.all) {
-            console.log("query results", result);
+            console.log(`Results of ${name} query`, result);
             console.table(toObject(result))
         }
     }
@@ -119,10 +119,18 @@ export async function load(db: AsyncDuckDB, filelist: FileList | undefined) {
     // queries
 
     // create the time table
-    await step(q.time);
+    await step('time', q.time);
 
     // create the traction table
-    await step(q.traction(sensors));
+    await step('traction', q.traction(sensors));
+
+    // collate traction
+    await step('traction_collated', q.traction_collated);
+
+
+    let collated = toObject(await conn.query('select * from traction_collated limit 1000;'));
+    console.log('collated')
+    console.table(collated)
 
     // Close connection
 

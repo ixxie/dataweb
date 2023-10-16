@@ -58,20 +58,44 @@
 	{#if filelist}
 		{#if ready}
 			<article>
-				<h2>graphiques</h2>
+				<h2>Graphiques</h2>
+				<h3>Séries temporelles minimap</h3>
+				<p>Faire glisser horizontalement pour zoomer sur une période</p>
 				<FilterTime {selection} {innerWidth} />
+				<h3>Séries Temporelles</h3>
 				<Timeseries {selection} {innerWidth} />
+				<h3>Distribution de fréquence minimap</h3>
 				<FilterSignal {selection} {innerWidth} />
+				<h3>Distribution de fréquence</h3>
 				<Distribution {selection} {innerWidth} />
-				<h2>tableaux</h2>
-				<Table from="traction" {selection} {innerWidth} />
-				<Table from="time" {innerWidth} />
+				<h2>Tableaux</h2>
+				<h3>Données de séries temporelles</h3>
+				<p>Traitée pour la correction du temps et la transformation des données.</p>
+				<Table
+					from="traction_collated"
+					{selection}
+					{innerWidth}
+					columns={{
+						timestamp: 200,
+						t: 50,
+						sensor1: 100,
+						sensor2: 100,
+						total: 100
+					}}
+					align={{
+						timestamp: 'left',
+						t: 'left',
+						sensor1: 'center',
+						sensor2: 'center',
+						total: 'center'
+					}}
+				/>
 			</article>
 		{:else}
-			<p>Charger...</p>
+			<span>Charger...</span>
 		{/if}
 	{:else}
-		<p>Sélectionnez un ou plusieurs fichiers datafficheur pour commencer...</p>
+		<span>Sélectionnez un ou plusieurs fichiers datafficheur pour commencer...</span>
 	{/if}
 </main>
 
@@ -135,8 +159,9 @@
 		text-transform: uppercase;
 	}
 
-	p {
+	span {
 		margin: 10rem;
 		font-size: larger;
+		display: block;
 	}
 </style>

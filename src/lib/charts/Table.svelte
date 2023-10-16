@@ -2,24 +2,27 @@
 	import * as vg from '@uwdata/vgplot';
 	import { onMount, onDestroy, getContext } from 'svelte';
 
+	import type { Table } from 'apache-arrow';
+
 	export let from: string;
 	export let columns: {} | undefined = undefined;
+	export let align: {} | undefined = undefined;
 	export let selection: any | undefined = undefined;
 	export let innerWidth: number;
 
 	const app = getContext('app-state');
 
-	let cols = columns ? { columns: Object.keys(columns) } : {};
-
 	let el: HTMLElement;
+	let table: Table;
 	$: table = vg.table({
 		from,
-		...(selection ? { filterBy: selection } : {}),
-		width: innerWidth,
+		width: columns,
 		maxWidth: innerWidth,
-		height: app.row,
+		height: app.row * 1.5,
 		margin: 0,
-		...cols
+		...(selection ? { filterBy: selection } : {}),
+		...(columns ? { columns: Object.keys(columns) } : {}),
+		...(align ? { align } : {})
 	});
 
 	onMount(() => {

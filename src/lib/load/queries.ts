@@ -23,7 +23,7 @@ const unpivot = (cols: string[], id: string | number = '') => /*sql*/`
             sensor${id} as (
                 select
                     *,
-                    cast(substring(u.column_id, 7) as int) - 2 as frame
+                    (cast(substring(u.column_id, 7) as int) - 2) % 10 as frame
                 from unpivoted${id} u
             )`;
 
@@ -32,7 +32,7 @@ const unpivoted = (sensors: Sensor[]): string[] =>
 
 const timeCorrection = (sensor: Sensor) => /*sql*/`
         select
-            '${sensor.id}' as sensor,
+            'sensor${sensor.id}' as sensor,
             s.column00 as id,
             s.column01 as timestamp,
             epoch(s.column01)*1000 as epoch,
@@ -64,13 +64,24 @@ const traction = (sensors: Sensor[]) => /*sql*/`
                 t,
                 sum(signal) as signal
             from traction
-            group by t, id;
+            group by t,id;
 `;
 
 const traction_collated = /*sql*/`
     create or replace table traction_collated as (
-        pivot traction on sensor using sum(signal);
-    )
+        with piv as (
+            pivot traction on sensor
+            using sum(signal :: float)
+            group by t
+        )
+        select distinct
+            trac.timestamp,
+            trac.t,
+            piv.*
+        from traction trac
+        join piv on trac.t = piv.t
+        order by trac.t
+    );
 `
 
 export const queries = {

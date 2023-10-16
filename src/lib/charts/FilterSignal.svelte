@@ -9,12 +9,11 @@
 
 	let el: HTMLElement;
 	$: plot = vg.plot(
-		vg.areaY(vg.from('traction'), {
+		vg.line(vg.from('traction'), {
 			x: vg.bin('signal', { steps: 150 }),
 			y: vg.count(),
-			fill: 'sensor',
-			fillOpacity: 0.6,
-			inset: 0.5
+			stroke: 'sensor',
+			curve: 'monotone-x'
 		}),
 		vg.width(innerWidth),
 		vg.height(app.row / 3),
