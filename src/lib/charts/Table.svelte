@@ -10,15 +10,13 @@
 	export let selection: any | undefined = undefined;
 	export let innerWidth: number;
 
-	const app = getContext('app-state');
-
 	let el: HTMLElement;
 	let table: Table;
 	$: table = vg.table({
 		from,
 		width: columns,
 		maxWidth: innerWidth,
-		height: app.row * 1.5,
+		height: 600,
 		margin: 0,
 		...(selection ? { filterBy: selection } : {}),
 		...(columns ? { columns: Object.keys(columns) } : {}),
@@ -33,4 +31,4 @@
 	});
 </script>
 
-<div class="chart" bind:this={el} style={app.css} />
+<div class="chart" bind:this={el} />

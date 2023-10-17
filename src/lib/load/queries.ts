@@ -32,7 +32,7 @@ const unpivoted = (sensors: Sensor[]): string[] =>
 
 const timeCorrection = (sensor: Sensor) => /*sql*/`
         select
-            'sensor${sensor.id}' as sensor,
+            'capteur_${sensor.id}' as capteur,
             s.column00 as id,
             s.column01 as timestamp,
             epoch(s.column01)*1000 as epoch,
@@ -55,7 +55,7 @@ const traction = (sensors: Sensor[]) => /*sql*/`
     );
     insert into traction
             select
-                'total' as sensor,
+                'total' as capteur,
                 id,
                 any_value(timestamp),
                 any_value(epoch),
@@ -70,12 +70,12 @@ const traction = (sensors: Sensor[]) => /*sql*/`
 const traction_collated = /*sql*/`
     create or replace table traction_collated as (
         with piv as (
-            pivot traction on sensor
+            pivot traction on capteur
             using sum(signal :: float)
             group by t
         )
         select distinct
-            trac.timestamp,
+            trac.timestamp as horodatage,
             trac.t,
             piv.*
         from traction trac

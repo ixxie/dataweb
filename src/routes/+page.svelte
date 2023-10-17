@@ -4,45 +4,35 @@
 	import { load } from '$lib/load';
 	import { FilterTime, FilterSignal, Timeseries, Distribution, Table } from '$lib/charts';
 
-	import { setContext } from 'svelte';
-
-	let ready = false;
-
 	let filelist: FileList | undefined;
-	$: init(filelist);
 
-	let selection: any;
-
-	let metadata: {} | undefined;
-
-	const setup = async (connector: ReturnType<typeof vg.wasmConnector>) => {
-		metadata = await load(connector.db, filelist);
-		await vg.coordinator().databaseConnector(connector);
-		selection = vg.Selection.crossfilter();
-		ready = true;
-	};
-
-	const init = (filelist: FileList | undefined) => {
+	const init = async (filelist: FileList | undefined) => {
+		let result;
+		let selection;
 		if (filelist) {
-			vg.wasmConnector({ log: false, cache: false }).then(setup);
+			const connector = await vg.wasmConnector({ log: false, cache: false });
+			// load the files
+			result = await load(connector.db, filelist);
+			// setup the coordinator
+			let coordinator = await vg.coordinator();
+			coordinator.databaseConnector(connector);
+			coordinator.clear();
+			// create the selection
+			selection = vg.Selection.crossfilter();
 		}
+		return { ...result, selection };
 	};
 
 	let innerWidth: number = 1000;
-
-	setContext('app-state', {
-		metadata,
-		row: 400,
-		css: `
-			font-size: 13px;
-		`
-	});
 </script>
 
 <svelte:window bind:innerWidth />
 
 <nav>
-	<h1>Datafficheur 2.0</h1>
+	<section>
+		<img src="hipologo.svg" style="height: 30px;" />
+		<h1>Datagraph Web</h1>
+	</section>
 	<menu class="fileloader">
 		<input
 			accept=".csv, text/plain"
@@ -56,17 +46,22 @@
 </nav>
 <main>
 	{#if filelist}
-		{#if ready}
+		{#await init(filelist)}
+			<span>Charger...</span>
+		{:then { metadata, selection }}
 			<article>
 				<h2>Graphiques</h2>
 				<h3>Séries temporelles minimap</h3>
 				<p>Faire glisser horizontalement pour zoomer sur une période</p>
 				<FilterTime {selection} {innerWidth} />
 				<h3>Séries Temporelles</h3>
+				<p>Les valeurs d'effort dans le temps</p>
 				<Timeseries {selection} {innerWidth} />
 				<h3>Distribution de fréquence minimap</h3>
+				<p>Faire glisser horizontalement pour zoomer sur une gamme d'efforts</p>
 				<FilterSignal {selection} {innerWidth} />
 				<h3>Distribution de fréquence</h3>
+				<p>Fréquence d'apparition d'une valeur d'effort</p>
 				<Distribution {selection} {innerWidth} />
 				<h2>Tableaux</h2>
 				<h3>Données de séries temporelles</h3>
@@ -76,24 +71,22 @@
 					{selection}
 					{innerWidth}
 					columns={{
-						timestamp: 200,
+						horodatage: 200,
 						t: 50,
-						sensor1: 100,
-						sensor2: 100,
+						capteur_1: 100,
+						...(metadata.sensorCount >= 2 ? { capteur_2: 100 } : {}),
 						total: 100
 					}}
 					align={{
-						timestamp: 'left',
+						horodatage: 'left',
 						t: 'left',
-						sensor1: 'center',
-						sensor2: 'center',
+						capteur_1: 'center',
+						...(metadata.sensorCount >= 2 ? { capteur_2: 'center' } : {}),
 						total: 'center'
 					}}
 				/>
 			</article>
-		{:else}
-			<span>Charger...</span>
-		{/if}
+		{/await}
 	{:else}
 		<span>Sélectionnez un ou plusieurs fichiers datafficheur pour commencer...</span>
 	{/if}
@@ -127,6 +120,15 @@
 		display: flex;
 		flex-flow: row nowrap;
 		justify-content: space-between;
+		align-items: center;
+		padding: 0.5rem;
+	}
+
+	nav > section {
+		display: flex;
+		flex-flow: row nowrap;
+		align-items: center;
+		gap: 0.5rem;
 	}
 
 	main {
@@ -150,18 +152,22 @@
 	}
 
 	h1 {
-		font-size: 16px;
+		font-size: 20px;
 		text-transform: uppercase;
 	}
 
 	h2 {
-		font-size: 14px;
+		font-size: 16px;
 		text-transform: uppercase;
+		display: flex;
+		flex-flow: row nowrap;
+		align-items: center;
 	}
 
 	span {
 		margin: 10rem;
 		font-size: larger;
 		display: block;
+		text-align: center;
 	}
 </style>

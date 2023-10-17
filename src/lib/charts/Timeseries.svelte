@@ -1,11 +1,9 @@
 <script lang="ts">
 	import * as vg from '@uwdata/vgplot';
-	import { onMount, onDestroy, getContext } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 
 	export let selection: any;
 	export let innerWidth: number;
-
-	const app = getContext('app-state');
 
 	let el: HTMLElement;
 	$: plot = vg.plot(
@@ -13,19 +11,18 @@
 		vg.line(vg.from('traction', { filterBy: selection }), {
 			x: 't',
 			y: 'signal',
-			stroke: 'sensor',
+			stroke: 'capteur',
 			opacity: 0.3
 		}),
 		vg.line(vg.from('traction', { filterBy: selection }), {
 			x: 't',
-			y: vg.avg('signal').partitionby('sensor').orderby('t').rows([-10, 10]),
-			stroke: 'sensor'
+			y: vg.avg('signal').partitionby('capteur').orderby('t').rows([-10, 10]),
+			stroke: 'capteur'
 		}),
 		vg.width(innerWidth),
-		vg.height(app.row),
+		vg.height(400),
 		vg.xDomain(selection),
-		vg.yLabel('puissance'),
-		vg.style(app.css),
+		vg.yLabel('Effort (daN)'),
 		vg.margin(0),
 		vg.grid(true),
 		vg.colorScale('categorical')
