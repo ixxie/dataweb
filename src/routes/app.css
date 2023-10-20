@@ -6,6 +6,11 @@
   box-sizing: border-box;
 }
 
+:root {
+  --primary: rgb(56, 56, 56);
+  --app-width: min(1200px, 100%);
+}
+
 html,
 body {
   width: 100%;
@@ -27,10 +32,50 @@ body {
   display: none !important;
 }
 
+.info {
+  margin: 10rem;
+  font-size: larger;
+  display: block;
+  text-align: center;
+}
 
-h1,
+
+/* Markup */
+
+article {
+  width: max-content;
+  padding: 0.5rem;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+}
+
+button {
+  border: 0;
+  background-color: var(--primary);
+  color: white;
+}
+
+h1 {
+  font-size: 20px;
+  text-transform: uppercase;
+}
+
 h2 {
   font-size: 16px;
+  text-transform: uppercase;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+}
+
+/* Charts & Tables */
+
+.chart {
+  display: flex;
+  flex-direction: row nowrap;
+  justify-content: center;
+  margin: 0.4rem;
 }
 
 table {
@@ -81,11 +126,4 @@ tr:not(:last-child) th {
 td {
   color: #444;
   vertical-align: top;
-}
-
-.chart {
-  display: flex;
-  flex-direction: row nowrap;
-  justify-content: center;
-  margin: 0.4rem;
 }
