@@ -31,7 +31,7 @@
 <nav>
 	<section>
 		<img src="hipologo.svg" style="height: 30px;" />
-		<h1>Datagraph Web</h1>
+		<h1>Hippotese Dataweb</h1>
 	</section>
 	<menu class="fileloader">
 		<input
