@@ -5,7 +5,7 @@
 <nav>
 	<section>
 		<img src="hipologo.svg" style="height: 30px;" alt="Hippotese Logo" />
-		<h1>Hippotese</h1>
+		<h1>Hippotese DataWeb</h1>
 	</section>
 </nav>
 <main>
